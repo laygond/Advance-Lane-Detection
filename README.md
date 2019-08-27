@@ -1,78 +1,30 @@
-## Advanced Lane Finding
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# Advanced Lane Finding
 
-
-In this project, your goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
-
-
-
-The Project
----
-
-Project Steps
-
-Steps we’ve covered so far:
-
-Camera calibration
-Distortion correction
-Color/gradient threshold
-Perspective transform
-Detect lane lines
-Determine the lane curvature
-
-The goals / steps of this project are the following:
-
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
-
-The images for camera calibration are stored in the folder called `camera_cal`.  The images in `test_images` are for testing your pipeline on single frames.  If you want to extract more test images from the videos, you can simply use an image writing method like `cv2.imwrite()`, i.e., you can read the video in frame by frame as usual, and for frames you want to save for later you can write to an image file.  
-
-To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `output_images`, and include a description in your writeup for the project of what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
-
-The `challenge_video.mp4` video is an extra (and optional) challenge for you if you want to test your pipeline under somewhat trickier conditions.  The `harder_challenge.mp4` video is another optional challenge and is brutal!
-
-If you're feeling ambitious (again, totally optional though), don't stop there!  We encourage you to go out and take video of your own, calibrate your camera and show us how you would implement this project from scratch!
-
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
+An image processing pipeline to detect a vehicle's lane on the roadway. The project makes use of two search techiques: "Sliding Windows" and "Around Polynomial Fit Search". This repo is inspired on [Udacity's CarND-Advanced-Lane-Lines repo](https://github.com/udacity/CarND-Advanced-Lane-Lines) abd it is used as a template and guide. 
 
 ---
-
-**Advanced Lane Finding Project**
-
-The goals / steps of this project are the following:
-
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
-
 [//]: # (Image References)
 
 [image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
+[image2]: ./README_images/samples_chess_images.JPG "Chess Images"
+[image3]: ./README_images/undistort_output.png "Undistorted".jpg "Binary Example"
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
-
-# Finding Lane Lines on the Road
-Very simple pipeline to detect the line segments in an image, then average/extrapolate them and draw them onto the image for display. The project makes use of Canny edge detection, Hough Transform, and RANSAC to find for each lane line a second order polynomio fit. This repo uses [Udacity's CarND-LaneLines-P1 repo](https://github.com/udacity/CarND-LaneLines-P1) as a base template and guide. 
-
 ![alt text](README_images/simple_lane_detection.gif)
+
+
+## Project Steps Overview
+
+- Camera calibration
+- Distortion correction
+- Color/gradient threshold
+- Perspective transform
+- Detect lane lines
+- Determine the lane curvature and vehicle position with respect to center.
+- Output visual display of the lane boundaries and numerical estimation.
 
 
 ## Directory Structure
@@ -96,12 +48,159 @@ Very simple pipeline to detect the line segments in an image, then average/extra
         └── ...
 ```
 
+## Camera calibration using chessboard images
+
+First step is to take 20 to 30 pictures of a chessboard with the camera you will be using on the self driving car. I have placed these images inside `camera_calibration_images`. Then determine
+
+- nx: Number of corners in any given row
+- ny: Number of corners in any given column
+
+<b>corners:</b> Points where two black and two white squares intersect. The following images are samples from `camera_calibration_images`. Note that my chessboard has nx=9 , ny=6. 
+
+
+With this we define the object points to determine the [camera calibration parameters](https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html).
+
+## Distortion Correction
+
+
+
+## Apply Perspective Transformation
+Next, you want to identify four source points for your perspective transform. The easiest way to do this is to investigate an image where the lane lines are straight. Try experimenting with different src points.
+
+
 ## Demo File
 
 #### Dataset
 The demo file makes use of Udacity's dataset to show results. However, once you have run and understood the `demo.ipynb`, feel free to try your own dataset by changing the input directory from the 'Read in Test Image' and 'Read in Test Video' sections from the demo file. The results of your own dataset will be displayed in an utput directory generated automatically by `demo.ipynb` at the same directory level as your input directory.
 
 #### Helper Functions
+
+def draw_roi_box(img, vertices, color=[0, 0, 255], thickness=5):
+    """
+    Draw a contour around region of interest on img (binary or color)
+    Vertices must be 2D array of coordinate pairs [[(x1,y1),...,(x4,y4)]]
+    
+    """
+   
+
+def applyThresh(image, thresh=(0,255)):
+    """
+    Apply threshold to binary image. Setting to '1' pixels> minThresh & pixels <= maxThresh.
+    """
+    binary = np.zeros_like(image)
+    binary[(image > thresh[0]) & (image <= thresh[1])] = 1
+    return binary
+
+def S_channel(image):
+    """
+    Returns the Saturation channel from an RGB image.
+    """
+    hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    S = hls[:,:,2]
+    return S
+    
+def sobel_X(image):
+    """
+    Applies Sobel in the x direction to an RGB image.
+    """
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    abs_sobelx = np.abs(cv2.Sobel(gray,cv2.CV_64F,1,0,ksize=3))
+    sobelx     = np.uint8(255*abs_sobelx/np.max(abs_sobelx))
+    return sobelx
+
+def binary_pipeline(image):
+    """
+    Combination of color and gradient thresholds for lane detection. 
+    Input image must be RGB
+    """
+def find_lane_pixels_in_sliding_window(binary_warped, nwindows=9, margin=100, minpix=50):
+    """
+    There is a left and right window sliding up independent from each other.
+    This function returns the pixel coordinates contained within the sliding windows
+    as well as the sliding windows midpoints
+    PARAMETERS
+    * nwindows : number of times window slides up
+    * margin   : half of window's width  (+/- margin from center of window box)
+    * minpix   : minimum number of pixels found to recenter window
+    """
+    def draw_lane_pixels_in_sliding_window(binary_warped, left_lane_pts, right_lane_pts, window_midpts, margin=100):
+    """
+    Paints lane pixels and sliding windows.
+    PARAMETERS
+    * margin : half of window's width  (+/- margin from center of window box)
+    """
+ def ransac_polyfit(x, y, order=2, n=100, k=10, t=100, d=20, f=0.9):
+    """
+    RANSAC: finds and returns best model coefficients
+    n – minimum number of data points required to fit the model
+
+def fit_polynomial(img_height, left_lane_pts, right_lane_pts):
+    """
+    Returns pixel coordinates and polynomial coefficients of left and right lane fit.
+    If empty lane pts are provided it returns coordinate (0,0) for left and right lane
+    and sets fits to None.
+    """
+  
+
+def find_lane_pixels_around_poly(binary_warped, left_fit, right_fit, margin = 100):
+    """
+    Returns the pixel coordinates contained within a margin from left and right polynomial fits.
+    Left and right fits shoud be from the previous frame.
+    PARAMETER
+    * margin: width around the polynomial fit
+    """
+def draw_lane_pixels_around_poly(binary_warped, left_lane_pts, right_lane_pts, previous_fit_pts, margin=100):
+    """
+    Paints lane pixels and poly fit margins. Poly fit margins are based on previous frame values.
+    PARAMETER
+    * margin: width around the polynomial fit
+    """
+ 
+
+def augment_previous_fit_pts(left_lane_pts, right_lane_pts, previous_fit_pts, density=4, line_width_margin=10):
+    """
+    Add to detected points the pts near previous line fits.
+    NOTE: This function makes the points from the bottom half of previous line fits five times as dense.
+    PARMETERS:
+    * density           : number of times points are added near line fits.
+    * line_width_margin : range of values generated near line fits
+    """  
+
+def measure_curvature_pixels(y_eval, left_fit, right_fit):
+    '''
+    Calculates the curvature of polynomial functions in pixels.
+    PARAMETERS
+    * y_eval : where we want radius of curvature to be evaluated (We'll choose the maximum y-value, bottom of image)
+    '''
+  
+  def measure_curvature_meters(y_eval, fit_pts, ym_per_pix= 30/720, xm_per_pix=3.7/900):
+    '''
+    Calculates the curvature of polynomial functions in meters. 
+    NOTE: Chose a straight line birdeye view image to calculate pixel to meter parameters.
+    PARAMETERS
+    * ym_per_pix : meters per pixel in y dimension (meters/length of lane in pixel)
+    * xm_per_pix : meters per pixel in x dimension (meters/width between lanes in pixel)
+    * y_eval     : where we want radius of curvature to be evaluated (We'll choose the maximum y-value, bottom of image)
+    
+  
+def lane_center_deviation_meters(img_width,fit_pts, xm_per_pix=3.7/900):
+    '''
+    Calculates the deviation from the center of the lanes in meters. 
+    NOTE: Chose a straight line birdeye view image to calculate pixel to meter parameters.
+    PARAMETERS
+    * xm_per_pix : meters per pixel in x dimension (meters/width between lanes in pixel)
+    '''
+
+def display_lane_roadway(image, fit_pts):
+    """
+    Colors the roadway of the vehicle's lane defined by the left and right fit points 
+    """
+
+def display_corner_image(image, corner_image, scale_size = 1/3):
+    """
+    Displays an image at the top corner of another image.
+    """
+    
 - `region_of_interest` keeps the region of the image defined by the user while the rest of the image is set to black.
 - `ransac_polyfit` finds the best 2nd order model coefficients by randomly testing subsets of a lane's line 
 - `line_slope_classifier` classifies pairs of pixel coordinates as left or right lane line based on the pair's line slope. It also allows the user to increase the density of points belonging to left or right lane line.
