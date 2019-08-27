@@ -2,9 +2,7 @@
 
 An image processing pipeline to detect a vehicle's lane on the roadway. The project makes use of two search techiques: "Sliding Windows" and "Around Polynomial Fit Search". This repo is inspired on [Udacity's CarND-Advanced-Lane-Lines repo](https://github.com/udacity/CarND-Advanced-Lane-Lines) and it is used as a template and guide. 
 
----
 [//]: # (Image References)
-
 [image1]: ./README_images/around_fit_correction.png
 [image2]: ./README_images/around_fit_fail.png
 [image3]: ./README_images/binary_perspectives.png
@@ -49,6 +47,20 @@ An image processing pipeline to detect a vehicle's lane on the roadway. The proj
 #### Dataset
 The demo file makes use of Udacity's dataset to show results. However, once you have run and understood the `demo.ipynb`, feel free to try your own dataset. Make sure to obtain the camera calibration parameters of the camera used for that dataset to apply distortion correction. For test videos, the results of the processed video will be displayed in an utput directory generated automatically by `demo.ipynb` at the same directory level as your input directory.
 
+#### Pipeline Strategy 
+
+![alt text][image16]
+
+#### Project's Steps Overview
+
+- Camera calibration
+- Distortion correction
+- Perspective transform
+- Color/gradient threshold
+- Detect lane lines
+- Determine the lane curvature and vehicle position with respect to center.
+- Output visual display of the lane boundaries and numerical estimation.
+
 #### Helper Functions
 
 - `applyThresh` converts a 2 channel image into binary by setting to '1' pixels in between specified values and remaining pixels to '0'.
@@ -69,22 +81,10 @@ The demo file makes use of Udacity's dataset to show results. However, once you 
 - `ransac_polyfit` finds the best 2nd order model coefficients by randomly testing subsets of a lane's line 
 - `draw_roi_box` this is a visual helper. It draws a contour of color around the region of interest to visually identify it. 
 
-#### Project's Steps Overview
-
-- Camera calibration
-- Distortion correction
-- Perspective transform
-- Color/gradient threshold
-- Detect lane lines
-- Determine the lane curvature and vehicle position with respect to center.
-- Output visual display of the lane boundaries and numerical estimation.
-
-<p align="center"> <img src="README_images/before.PNG"> </p>
-<p align="center"> Fig: Original Image </p>
 
 ##  Project's Steps
 
-#### Camera calibration using chessboard images
+### Camera calibration using chessboard images
 
 First step is to take 20 to 30 pictures of a chessboard with the camera you will be using on the self driving car. I have placed these images inside `camera_calibration_images`. Then determine
 
@@ -100,15 +100,14 @@ With this we define the  `objpoints` and `imgpoints` to determine the [camera ca
 ![alt text][image5]
 
 
-#### Distortion Correction
+### Distortion Correction
 With the previous parameters we are ready to correct for distortion as shown in code cell 4 from `demo.ipynb`.  
 ![alt text][image15]
 
 
-#### Apply Perspective Transformation
+### Apply Perspective Transformation
 Next, you want to identify four source points for your perspective transform. The easiest way to do this is to investigate on an image where the lane lines are straight. I used `draw_roi_box` helper function to visually choose my source src points.
 
-<p align="center"> <img src=[image11]> </p> 
 ![alt text][image11]
 
 Then choose you destination points to apply perspective transform. In the following figure:
@@ -118,7 +117,7 @@ Then choose you destination points to apply perspective transform. In the follow
 ![alt text][image12]
 
 
-#### Color Transforms & Gradients ->  Thresholded Binary Image.
+### Color Transforms & Gradients ->  Thresholded Binary Image.
 I used a combination of color and gradient thresholds to generate a binary image. This is seen in code cell 9 from `demo.ipynb`.
 - `applyThresh` converts a 2 channel image into binary by setting to '1' pixels in between specified values and remaining pixels to '0'.
 - `S_channel` returns the saturation channel from an RGB image.
@@ -131,12 +130,12 @@ And our binary pipeline in our perspective tranformed images would look like:
 
 ![alt text][image3]
 
-####  Detect Lane Lines: Sliding Windows
+###  Detect Lane Lines: Sliding Windows
 Sliding Windows Method is implemented by `find_lane_pixels_in_sliding_window` and displayed by `draw_lane_pixels_in_sliding_window`. It starts by placing to small windows at the bottom of our binary bird's eye view image. The location of the initial left and right windows for the left and right lane lines is done by applying a vertical histogram to determine the maximum x-axis of activated pixels. Next, those windows are slided up and recentered to where most pixels are. This process is repeated until you reach the top of the image. Once the pixels are found you can use `fit_polynomial` to obtain our new fits to each lane line.
 
 ![alt text][image14]
 
-####  Detect Lane Lines: Around Polynomial Fit
+###  Detect Lane Lines: Around Polynomial Fit
 Once the lane line fits are found we do not have to search from scratch using the sliding windows method again. We can search in the next frame around these previously found line fits. I will first shift our binary image to simulate our "next" frame
 
 ![alt text][image10]
@@ -156,7 +155,7 @@ Let's try again! this time we apply `find_lane_pixels_around_poly`, display it u
 It worked!
 
 
-#### Radius of Curvature &  Deviation of Vehicle from Center of Lane.
+### Radius of Curvature &  Deviation of Vehicle from Center of Lane.
 
 Radius of curvature is implemented to each lane line using `measure_curvature_meters` through the following equations:
 
@@ -168,7 +167,7 @@ This is done in code cell 17 from `demo.ipynb`. The results we have acquired for
 
 Finally, for finding the deviation of the vehicle from the center of the lane we assume the camera of the car is positioned at its center. Therefore, the difference between the center of the image and the center of the lane is the deviation we are looking for. This is done by `lane_center_deviation_meters` in code cell 18 from `demo.ipynb`. The following subsection displays some results.
 
-#### Output Visual Display
+### Output Visual Display
 
 This subsection is in charge of adding all the results from the previous subsections. All that binary birds eye view analysis will be displayed on the top corner of the original image using `display_corner_image`. With the left and right fit points we can color to the vehicle's lane and warp it back to the original image which is done by `display_lane_roadway`. Finally, radius of curvature, lane deviation, and search type algorithm implemented can be displayed using `cv2.putText`.
 
@@ -176,9 +175,7 @@ This subsection is in charge of adding all the results from the previous subsect
 
 We put the same image twice through our pipeline. In the left it used sliding window search while in the right since it already had the previous line fit, it used around poly fit search.
 
-## Pipeline Strategy 
-
-![alt text][image16]
+---
 
 Here's a [link to my video result](./Udacity_dataset/test_videos_output/project_video.mp4)
 
